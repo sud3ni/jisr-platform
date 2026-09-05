@@ -1,0 +1,1334 @@
+"use client";
+
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase-client";
+
+type Opportunity = {
+  id: string;
+  title: string;
+  opportunity_type?: string | null;
+  city?: string | null;
+  state?: string | null;
+  status?: string | null;
+  created_at?: string | null;
+};
+
+function BridgeLogo({
+  className = "h-9 w-9",
+}: {
+  className?: string;
+}) {
+  return (
+    <svg
+      viewBox="0 0 64 64"
+      className={className}
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <path
+        d="M8 43C18 23 46 23 56 43"
+        stroke="currentColor"
+        strokeWidth="5"
+        strokeLinecap="round"
+      />
+      <path
+        d="M8 43H56"
+        stroke="currentColor"
+        strokeWidth="5"
+        strokeLinecap="round"
+      />
+      <path
+        d="M18 43V34"
+        stroke="currentColor"
+        strokeWidth="4"
+        strokeLinecap="round"
+      />
+      <path
+        d="M32 43V29"
+        stroke="currentColor"
+        strokeWidth="4"
+        strokeLinecap="round"
+      />
+      <path
+        d="M46 43V34"
+        stroke="currentColor"
+        strokeWidth="4"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function BriefcaseIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="h-6 w-6"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    >
+      <rect x="3" y="7" width="18" height="13" rx="2" />
+      <path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+      <path d="M3 12h18" />
+      <path d="M10 12v2h4v-2" />
+    </svg>
+  );
+}
+
+function GraduationIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="h-6 w-6"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M3 9l9-5 9 5-9 5-9-5Z" />
+      <path d="M7 11.5V16c2.8 2 7.2 2 10 0v-4.5" />
+      <path d="M21 10v6" />
+    </svg>
+  );
+}
+
+function UsersIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="h-6 w-6"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="9" cy="8" r="3" />
+      <path d="M3 20c0-3.2 2.7-5 6-5s6 1.8 6 5" />
+      <path d="M16 5.5a3 3 0 0 1 0 5.8" />
+      <path d="M18 15c1.8.6 3 2 3 4" />
+    </svg>
+  );
+}
+
+function BuildingIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="h-6 w-6"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M4 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17" />
+      <path d="M16 9h3a1 1 0 0 1 1 1v11" />
+      <path d="M8 7h4M8 11h4M8 15h4" />
+      <path d="M9 21v-3h2v3" />
+      <path d="M3 21h18" />
+    </svg>
+  );
+}
+
+function ArrowIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="h-4 w-4"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M5 12h14" />
+      <path d="m13 6 6 6-6 6" />
+    </svg>
+  );
+}
+
+function LocationIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="h-4 w-4"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z" />
+      <circle cx="12" cy="10" r="2.5" />
+    </svg>
+  );
+}
+
+function FacebookIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="h-5 w-5"
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <path d="M13.5 21v-8h2.7l.4-3h-3.1V8.1c0-.9.3-1.6 1.7-1.6h1.8V3.8c-.3 0-1.3-.1-2.5-.1-2.5 0-4.2 1.5-4.2 4.3V10H7.5v3h2.8v8h3.2Z" />
+    </svg>
+  );
+}
+
+function TelegramIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="h-5 w-5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="m21 3-7.1 18-3.5-7.1L3 10.4 21 3Z" />
+      <path d="m10.4 13.9 4.4-4.5" />
+    </svg>
+  );
+}
+
+function MailIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="h-5 w-5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <path d="m4 7 8 6 8-6" />
+    </svg>
+  );
+}
+
+function OpportunityIcon({
+  type,
+}: {
+  type?: string | null;
+}) {
+  if (type === "training") {
+    return <GraduationIcon />;
+  }
+
+  if (type === "volunteer") {
+    return <UsersIcon />;
+  }
+
+  if (type === "cooperation") {
+    return <BuildingIcon />;
+  }
+
+  return <BriefcaseIcon />;
+}
+
+function opportunityTypeLabel(
+  type?: string | null
+) {
+  if (type === "training") return "تدريب";
+  if (type === "job") return "وظيفة";
+  if (type === "volunteer") return "تطوع";
+  if (type === "cooperation") return "تعاون";
+
+  return type || "فرصة";
+}
+
+export default function HomePage() {
+  const [opportunities, setOpportunities] =
+    useState<Opportunity[]>([]);
+
+  const [opportunitiesCount, setOpportunitiesCount] =
+    useState(0);
+
+  const [institutionsCount, setInstitutionsCount] =
+    useState(0);
+
+  const [usersCount, setUsersCount] =
+    useState(0);
+
+  const [applicationsCount, setApplicationsCount] =
+    useState(0);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  useEffect(() => {
+    loadHomeData();
+  }, []);
+
+  async function loadHomeData() {
+    setLoading(true);
+
+    try {
+      /*
+       * ================================
+       * OPPORTUNITIES
+       * ================================
+       */
+
+      const {
+        data: opportunitiesData,
+        count: opportunityCount,
+        error: opportunitiesError,
+      } = await supabase
+        .from("opportunities")
+        .select(
+          "id,title,opportunity_type,city,state,status,created_at",
+          {
+            count: "exact",
+          }
+        )
+        .eq("status", "published")
+        .order("created_at", {
+          ascending: false,
+        })
+        .limit(6);
+
+      if (opportunitiesError) {
+        console.error(
+          "OPPORTUNITIES ERROR:",
+          opportunitiesError
+        );
+
+        setOpportunities([]);
+        setOpportunitiesCount(0);
+      } else {
+        console.log(
+          "OPPORTUNITIES DATA:",
+          opportunitiesData
+        );
+
+        console.log(
+          "OPPORTUNITIES COUNT:",
+          opportunityCount
+        );
+
+        setOpportunities(
+          (opportunitiesData || []) as Opportunity[]
+        );
+
+        setOpportunitiesCount(
+          opportunityCount ??
+            opportunitiesData?.length ??
+            0
+        );
+      }
+
+      /*
+       * ================================
+       * INSTITUTIONS
+       * ================================
+       */
+
+      const {
+        count: institutionCount,
+        error: institutionsError,
+      } = await supabase
+        .from("institutions")
+        .select("id", {
+          count: "exact",
+          head: true,
+        });
+
+      if (institutionsError) {
+        console.error(
+          "INSTITUTIONS ERROR:",
+          institutionsError
+        );
+      }
+
+      setInstitutionsCount(
+        institutionCount ?? 0
+      );
+
+      /*
+       * ================================
+       * USERS
+       * ================================
+       */
+
+      const {
+        count: userCount,
+        error: usersError,
+      } = await supabase
+        .from("users")
+        .select("id", {
+          count: "exact",
+          head: true,
+        })
+        .in("role", [
+          "student",
+          "graduate",
+        ]);
+
+      if (usersError) {
+        console.error(
+          "USERS ERROR:",
+          usersError
+        );
+      }
+
+      setUsersCount(
+        userCount ?? 0
+      );
+
+      /*
+       * ================================
+       * APPLICATIONS
+       * ================================
+       */
+
+      const {
+        count: applicationCount,
+        error: applicationsError,
+      } = await supabase
+        .from("applications")
+        .select("id", {
+          count: "exact",
+          head: true,
+        });
+
+      if (applicationsError) {
+        console.error(
+          "APPLICATIONS ERROR:",
+          applicationsError
+        );
+      }
+
+      setApplicationsCount(
+        applicationCount ?? 0
+      );
+    } catch (error) {
+      console.error(
+        "HOME PAGE ERROR:",
+        error
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <main
+      dir="rtl"
+      className="min-h-screen bg-slate-50 text-slate-900"
+    >
+      {/* ================= NAVBAR ================= */}
+
+      <header className="sticky top-0 z-50 border-b border-slate-200/70 bg-white/95 backdrop-blur">
+        <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 lg:px-8">
+
+          <Link
+            href="/"
+            className="flex items-center gap-3"
+          >
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-700 text-white shadow-lg shadow-blue-700/20">
+              <BridgeLogo className="h-7 w-7" />
+            </div>
+
+            <div>
+              <h1 className="text-xl font-extrabold text-slate-900">
+                جسر
+              </h1>
+
+              <p className="text-xs text-slate-500">
+                منصة الفرص
+              </p>
+            </div>
+          </Link>
+
+          <nav className="hidden items-center gap-8 lg:flex">
+            <Link
+              href="/"
+              className="font-semibold text-blue-700"
+            >
+              الرئيسية
+            </Link>
+
+            <Link
+              href="/opportunities"
+              className="font-semibold text-slate-600 transition hover:text-blue-700"
+            >
+              الفرص
+            </Link>
+
+            <a
+              href="#about"
+              className="font-semibold text-slate-600 transition hover:text-blue-700"
+            >
+              عن جسر
+            </a>
+
+            <a
+              href="#how"
+              className="font-semibold text-slate-600 transition hover:text-blue-700"
+            >
+              كيف يعمل؟
+            </a>
+
+            <a
+              href="#contact"
+              className="font-semibold text-slate-600 transition hover:text-blue-700"
+            >
+              تواصل معنا
+            </a>
+          </nav>
+
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Link
+              href="/login"
+              className="hidden rounded-xl px-4 py-2.5 font-bold text-slate-700 transition hover:bg-slate-100 sm:block"
+            >
+              تسجيل الدخول
+            </Link>
+
+            <Link
+              href="/register"
+              className="rounded-xl bg-blue-700 px-4 py-2.5 font-bold text-white shadow-lg shadow-blue-700/20 transition hover:bg-blue-800"
+            >
+              إنشاء حساب
+            </Link>
+          </div>
+
+        </div>
+      </header>
+
+      {/* ================= HERO ================= */}
+
+      <section className="relative overflow-hidden bg-gradient-to-br from-blue-700 via-blue-800 to-indigo-950 text-white">
+
+        <div className="absolute -right-32 -top-32 h-96 w-96 rounded-full bg-white/10" />
+
+        <div className="absolute -bottom-48 -left-32 h-[32rem] w-[32rem] rounded-full bg-white/5" />
+
+        <div className="absolute right-1/3 top-20 h-40 w-40 rounded-full bg-blue-400/10 blur-3xl" />
+
+        <div className="relative mx-auto grid max-w-7xl gap-12 px-6 py-20 lg:grid-cols-2 lg:items-center lg:px-8 lg:py-28">
+
+          <div>
+
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-blue-50 backdrop-blur">
+              <span className="h-2 w-2 rounded-full bg-emerald-300" />
+              منصة جسر للفرص
+            </div>
+
+            <h2 className="max-w-3xl text-4xl font-extrabold leading-tight sm:text-5xl lg:text-6xl">
+              جسر بينك وبين
+              <span className="block text-blue-200">
+                فرصتك القادمة
+              </span>
+            </h2>
+
+            <p className="mt-6 max-w-2xl text-lg leading-9 text-blue-100 sm:text-xl">
+              منصة تجمع الطلاب والخريجين بالمؤسسات،
+              وتساعدك على اكتشاف فرص التدريب والعمل
+              والتطوع والتقديم عليها بسهولة.
+            </p>
+
+            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+
+              <Link
+                href="/opportunities"
+                className="inline-flex items-center justify-center gap-3 rounded-xl bg-white px-7 py-4 font-bold text-blue-800 shadow-xl transition hover:-translate-y-0.5 hover:bg-blue-50"
+              >
+                استعرض الفرص
+                <ArrowIcon />
+              </Link>
+
+              <Link
+                href="/register"
+                className="inline-flex items-center justify-center rounded-xl border border-white/30 bg-white/10 px-7 py-4 font-bold text-white backdrop-blur transition hover:bg-white/15"
+              >
+                أنشئ حسابك الآن
+              </Link>
+
+            </div>
+
+            <div className="mt-10 flex flex-wrap gap-x-8 gap-y-4 text-sm text-blue-100">
+
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-white">
+                  {opportunitiesCount}
+                </span>
+                فرصة متاحة
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-white">
+                  {institutionsCount}
+                </span>
+                مؤسسة
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-white">
+                  {usersCount}
+                </span>
+                طالب وخريج
+              </div>
+
+            </div>
+
+          </div>
+
+          {/* Hero visual */}
+
+          <div className="relative hidden lg:block">
+
+            <div className="relative mx-auto max-w-lg">
+
+              <div className="absolute -right-6 -top-6 h-24 w-24 rounded-3xl bg-white/10" />
+
+              <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-blue-400/10 blur-2xl" />
+
+              <div className="relative rounded-[2rem] border border-white/15 bg-white/10 p-6 shadow-2xl backdrop-blur-xl">
+
+                <div className="rounded-3xl bg-white p-6 text-slate-900 shadow-xl">
+
+                  <div className="flex items-center justify-between">
+
+                    <div className="flex items-center gap-3">
+
+                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-700">
+                        <BriefcaseIcon />
+                      </div>
+
+                      <div>
+                        <p className="text-xs font-semibold text-slate-400">
+                          فرصة جديدة
+                        </p>
+
+                        <h3 className="font-bold">
+                          فرصة تدريبية
+                        </h3>
+                      </div>
+
+                    </div>
+
+                    <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">
+                      متاحة
+                    </span>
+
+                  </div>
+
+                  <div className="mt-6 space-y-3">
+                    <div className="h-3 w-4/5 rounded-full bg-slate-100" />
+                    <div className="h-3 w-3/5 rounded-full bg-slate-100" />
+                  </div>
+
+                  <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-5">
+
+                    <div className="flex items-center gap-2 text-sm text-slate-500">
+                      <LocationIcon />
+                      الخرطوم
+                    </div>
+
+                    <span className="font-bold text-blue-700">
+                      عرض الفرصة
+                    </span>
+
+                  </div>
+
+                </div>
+
+                <div className="mt-4 grid grid-cols-2 gap-4">
+
+                  <div className="rounded-2xl bg-white/10 p-4 text-center">
+                    <p className="text-2xl font-extrabold">
+                      {opportunitiesCount}
+                    </p>
+
+                    <p className="mt-1 text-xs text-blue-100">
+                      فرصة
+                    </p>
+                  </div>
+
+                  <div className="rounded-2xl bg-white/10 p-4 text-center">
+                    <p className="text-2xl font-extrabold">
+                      {applicationsCount}
+                    </p>
+
+                    <p className="mt-1 text-xs text-blue-100">
+                      طلب تقديم
+                    </p>
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+      {/* ================= STATS ================= */}
+
+      <section className="relative -mt-8 px-6">
+        <div className="mx-auto grid max-w-6xl grid-cols-2 overflow-hidden rounded-3xl bg-white shadow-xl ring-1 ring-slate-100 md:grid-cols-4">
+
+          <div className="border-b border-slate-100 p-6 text-center md:border-b-0 md:border-l">
+            <p className="text-3xl font-extrabold text-blue-700">
+              {opportunitiesCount}
+            </p>
+
+            <p className="mt-2 text-sm font-semibold text-slate-500">
+              فرصة متاحة
+            </p>
+          </div>
+
+          <div className="border-b border-slate-100 p-6 text-center md:border-b-0 md:border-l">
+            <p className="text-3xl font-extrabold text-indigo-700">
+              {usersCount}
+            </p>
+
+            <p className="mt-2 text-sm font-semibold text-slate-500">
+              طالب وخريج
+            </p>
+          </div>
+
+          <div className="border-b border-slate-100 p-6 text-center md:border-b-0 md:border-l">
+            <p className="text-3xl font-extrabold text-purple-700">
+              {institutionsCount}
+            </p>
+
+            <p className="mt-2 text-sm font-semibold text-slate-500">
+              مؤسسة
+            </p>
+          </div>
+
+          <div className="p-6 text-center">
+            <p className="text-3xl font-extrabold text-emerald-600">
+              {applicationsCount}
+            </p>
+
+            <p className="mt-2 text-sm font-semibold text-slate-500">
+              طلب تقديم
+            </p>
+          </div>
+
+        </div>
+      </section>
+
+      {/* ================= OPPORTUNITY TYPES ================= */}
+
+      <section className="mx-auto max-w-7xl px-6 py-20 lg:px-8">
+
+        <div className="mx-auto max-w-2xl text-center">
+
+          <span className="text-sm font-bold text-blue-700">
+            اكتشف إمكانياتك
+          </span>
+
+          <h2 className="mt-3 text-3xl font-extrabold text-slate-900 sm:text-4xl">
+            فرص تناسب طموحك
+          </h2>
+
+          <p className="mt-4 leading-8 text-slate-500">
+            اكتشف مجموعة متنوعة من الفرص التي تساعدك
+            على تطوير مهاراتك وبناء مستقبلك المهني.
+          </p>
+
+        </div>
+
+        <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+
+          {[
+            {
+              type: "job",
+              title: "وظائف",
+              description:
+                "اكتشف الوظائف المناسبة لمهاراتك وتخصصك.",
+            },
+            {
+              type: "training",
+              title: "تدريب",
+              description:
+                "طور خبرتك العملية من خلال فرص تدريبية.",
+            },
+            {
+              type: "volunteer",
+              title: "تطوع",
+              description:
+                "ساهم في المجتمع واكتسب خبرات جديدة.",
+            },
+            {
+              type: "cooperation",
+              title: "فرص تعاون",
+              description:
+                "شارك في مشاريع وفرص تعاون مميزة.",
+            },
+          ].map((item) => (
+
+            <Link
+              key={item.type}
+              href={`/opportunities?type=${item.type}`}
+              className="group rounded-2xl border border-slate-200 bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl"
+            >
+
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-blue-700 transition group-hover:bg-blue-700 group-hover:text-white">
+                <OpportunityIcon type={item.type} />
+              </div>
+
+              <h3 className="mt-6 text-xl font-bold text-slate-900">
+                {item.title}
+              </h3>
+
+              <p className="mt-3 text-sm leading-7 text-slate-500">
+                {item.description}
+              </p>
+
+              <div className="mt-5 flex items-center gap-2 text-sm font-bold text-blue-700">
+                استعرض الفرص
+                <ArrowIcon />
+              </div>
+
+            </Link>
+
+          ))}
+
+        </div>
+      </section>
+
+      {/* ================= LATEST OPPORTUNITIES ================= */}
+
+      <section
+        id="opportunities"
+        className="bg-white py-20"
+      >
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+
+          <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
+
+            <div>
+              <span className="text-sm font-bold text-blue-700">
+                أحدث ما وصل إلى جسر
+              </span>
+
+              <h2 className="mt-2 text-3xl font-extrabold text-slate-900">
+                أحدث الفرص
+              </h2>
+
+              <p className="mt-3 text-slate-500">
+                اطلع على أحدث الفرص المنشورة على المنصة.
+              </p>
+            </div>
+
+            <Link
+              href="/opportunities"
+              className="inline-flex items-center gap-2 font-bold text-blue-700 hover:text-blue-800"
+            >
+              عرض جميع الفرص
+              <ArrowIcon />
+            </Link>
+
+          </div>
+
+          {loading ? (
+
+            <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+
+              {[1, 2, 3].map((item) => (
+                <div
+                  key={item}
+                  className="animate-pulse rounded-2xl border border-slate-100 bg-slate-50 p-6"
+                >
+                  <div className="h-12 w-12 rounded-xl bg-slate-200" />
+                  <div className="mt-6 h-5 w-3/4 rounded bg-slate-200" />
+                  <div className="mt-4 h-4 w-1/2 rounded bg-slate-200" />
+                  <div className="mt-8 h-4 w-full rounded bg-slate-200" />
+                </div>
+              ))}
+
+            </div>
+
+          ) : opportunities.length === 0 ? (
+
+            <div className="mt-10 rounded-3xl border border-slate-200 bg-slate-50 p-12 text-center">
+
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-white text-slate-400 shadow-sm">
+                <BriefcaseIcon />
+              </div>
+
+              <h3 className="mt-5 text-xl font-bold text-slate-800">
+                لا توجد فرص متاحة حاليًا
+              </h3>
+
+              <p className="mt-2 text-slate-500">
+                ستظهر هنا أحدث الفرص عند نشرها واعتمادها.
+              </p>
+
+              <Link
+                href="/opportunities"
+                className="mt-6 inline-flex items-center gap-2 rounded-xl bg-blue-700 px-6 py-3 text-sm font-bold text-white transition hover:bg-blue-800"
+              >
+                تصفح صفحة الفرص
+                <ArrowIcon />
+              </Link>
+
+            </div>
+
+          ) : (
+
+            <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+
+              {opportunities.map((opportunity) => (
+
+                <Link
+                  key={opportunity.id}
+                  href={`/opportunities/${opportunity.id}`}
+                  className="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl"
+                >
+
+                  <div className="flex items-start justify-between gap-4">
+
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-700">
+                      <OpportunityIcon
+                        type={
+                          opportunity.opportunity_type
+                        }
+                      />
+                    </div>
+
+                    <span className="rounded-full bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-700">
+                      {opportunityTypeLabel(
+                        opportunity.opportunity_type
+                      )}
+                    </span>
+
+                  </div>
+
+                  <h3 className="mt-6 line-clamp-2 text-xl font-bold text-slate-900 group-hover:text-blue-700">
+                    {opportunity.title}
+                  </h3>
+
+                  {(opportunity.city ||
+                    opportunity.state) && (
+
+                    <div className="mt-4 flex items-center gap-2 text-sm text-slate-500">
+                      <LocationIcon />
+
+                      <span>
+                        {[
+                          opportunity.city,
+                          opportunity.state,
+                        ]
+                          .filter(Boolean)
+                          .join("، ")}
+                      </span>
+                    </div>
+
+                  )}
+
+                  <div className="mt-6 border-t border-slate-100 pt-5">
+
+                    <span className="inline-flex items-center gap-2 text-sm font-bold text-blue-700">
+                      عرض تفاصيل الفرصة
+                      <ArrowIcon />
+                    </span>
+
+                  </div>
+
+                </Link>
+
+              ))}
+
+            </div>
+
+          )}
+
+        </div>
+      </section>
+
+      {/* ================= HOW IT WORKS ================= */}
+
+      <section
+        id="how"
+        className="mx-auto max-w-7xl px-6 py-20 lg:px-8"
+      >
+
+        <div className="mx-auto max-w-2xl text-center">
+
+          <span className="text-sm font-bold text-blue-700">
+            بسيط وواضح
+          </span>
+
+          <h2 className="mt-3 text-3xl font-extrabold text-slate-900 sm:text-4xl">
+            كيف يعمل جسر؟
+          </h2>
+
+        </div>
+
+        <div className="mt-14 grid gap-8 md:grid-cols-4">
+
+          {[
+            {
+              number: "01",
+              title: "أنشئ حسابك",
+              text: "سجل حسابك كطالب أو خريج أو مؤسسة.",
+            },
+            {
+              number: "02",
+              title: "اكتشف الفرص",
+              text: "تصفح الفرص وابحث عن الأنسب لك.",
+            },
+            {
+              number: "03",
+              title: "قدم طلبك",
+              text: "أرسل طلب التقديم والسيرة الذاتية.",
+            },
+            {
+              number: "04",
+              title: "تابع طلبك",
+              text: "تابع حالة طلبك واستقبل الإشعارات.",
+            },
+          ].map((step) => (
+
+            <div
+              key={step.number}
+              className="relative rounded-2xl bg-white p-7 shadow-sm ring-1 ring-slate-100"
+            >
+
+              <div className="text-4xl font-extrabold text-blue-100">
+                {step.number}
+              </div>
+
+              <h3 className="mt-5 text-xl font-bold text-slate-900">
+                {step.title}
+              </h3>
+
+              <p className="mt-3 text-sm leading-7 text-slate-500">
+                {step.text}
+              </p>
+
+            </div>
+
+          ))}
+
+        </div>
+      </section>
+
+      {/* ================= ABOUT ================= */}
+
+      <section
+        id="about"
+        className="bg-blue-50 py-20"
+      >
+
+        <div className="mx-auto grid max-w-7xl gap-12 px-6 lg:grid-cols-2 lg:items-center lg:px-8">
+
+          <div>
+
+            <span className="text-sm font-bold text-blue-700">
+              عن منصة جسر
+            </span>
+
+            <h2 className="mt-3 text-3xl font-extrabold leading-tight text-slate-900 sm:text-4xl">
+              منصة واحدة تجمع المواهب
+              <span className="block text-blue-700">
+                بالفرص المناسبة
+              </span>
+            </h2>
+
+            <p className="mt-6 leading-9 text-slate-600">
+              جسر منصة تهدف إلى تسهيل الوصول إلى فرص
+              التدريب والعمل والتطوع، وربط الطلاب والخريجين
+              بالمؤسسات التي تبحث عن المواهب والطاقات الجديدة.
+            </p>
+
+            <div className="mt-8">
+
+              <Link
+                href="/register"
+                className="inline-flex items-center gap-3 rounded-xl bg-blue-700 px-6 py-3.5 font-bold text-white shadow-lg shadow-blue-700/20 transition hover:bg-blue-800"
+              >
+                انضم إلى جسر
+                <ArrowIcon />
+              </Link>
+
+            </div>
+
+          </div>
+
+          <div className="grid grid-cols-2 gap-5">
+
+            <div className="rounded-3xl bg-white p-7 shadow-sm">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-700">
+                <GraduationIcon />
+              </div>
+
+              <h3 className="mt-5 font-bold text-slate-900">
+                للطلاب والخريجين
+              </h3>
+
+              <p className="mt-2 text-sm leading-7 text-slate-500">
+                فرص تساعدك على بناء خبرتك ومسيرتك المهنية.
+              </p>
+            </div>
+
+            <div className="mt-8 rounded-3xl bg-white p-7 shadow-sm">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 text-indigo-700">
+                <BuildingIcon />
+              </div>
+
+              <h3 className="mt-5 font-bold text-slate-900">
+                للمؤسسات
+              </h3>
+
+              <p className="mt-2 text-sm leading-7 text-slate-500">
+                انشر فرصك واستقبل طلبات المتقدمين.
+              </p>
+            </div>
+
+            <div className="-mt-8 rounded-3xl bg-white p-7 shadow-sm">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-50 text-purple-700">
+                <UsersIcon />
+              </div>
+
+              <h3 className="mt-5 font-bold text-slate-900">
+                مجتمع متنامٍ
+              </h3>
+
+              <p className="mt-2 text-sm leading-7 text-slate-500">
+                مساحة تجمع المواهب والمؤسسات في مكان واحد.
+              </p>
+            </div>
+
+            <div className="rounded-3xl bg-white p-7 shadow-sm">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
+                <BriefcaseIcon />
+              </div>
+
+              <h3 className="mt-5 font-bold text-slate-900">
+                فرص متنوعة
+              </h3>
+
+              <p className="mt-2 text-sm leading-7 text-slate-500">
+                وظائف وتدريب وتطوع وفرص تعاون.
+              </p>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+      {/* ================= INSTITUTIONS CTA ================= */}
+
+      <section className="px-6 py-20">
+
+        <div className="mx-auto max-w-6xl overflow-hidden rounded-[2rem] bg-gradient-to-l from-blue-800 to-indigo-950 px-7 py-12 text-white shadow-2xl sm:px-12 lg:flex lg:items-center lg:justify-between">
+
+          <div className="max-w-2xl">
+
+            <span className="text-sm font-bold text-blue-200">
+              للمؤسسات والجهات
+            </span>
+
+            <h2 className="mt-3 text-3xl font-extrabold sm:text-4xl">
+              لديك فرصة تريد مشاركتها؟
+            </h2>
+
+            <p className="mt-4 leading-8 text-blue-100">
+              انضم إلى جسر وانشر فرص التدريب والعمل والتطوع
+              للوصول إلى الطلاب والخريجين المناسبين.
+            </p>
+
+          </div>
+
+          <Link
+            href="/register"
+            className="mt-8 inline-flex shrink-0 items-center justify-center gap-3 rounded-xl bg-white px-7 py-4 font-bold text-blue-800 shadow-xl transition hover:bg-blue-50 lg:mt-0"
+          >
+            تسجيل مؤسسة
+            <ArrowIcon />
+          </Link>
+
+        </div>
+
+      </section>
+
+      {/* ================= FOOTER ================= */}
+
+      <footer
+        id="contact"
+        className="bg-slate-950 text-white"
+      >
+
+        <div className="mx-auto max-w-7xl px-6 py-14 lg:px-8">
+
+          <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-4">
+
+            <div className="lg:col-span-2">
+
+              <Link
+                href="/"
+                className="inline-flex items-center gap-3"
+              >
+
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-700 text-white">
+                  <BridgeLogo className="h-7 w-7" />
+                </div>
+
+                <div>
+                  <h2 className="text-xl font-extrabold">
+                    جسر
+                  </h2>
+
+                  <p className="text-xs text-slate-400">
+                    منصة الفرص
+                  </p>
+                </div>
+
+              </Link>
+
+              <p className="mt-6 max-w-lg leading-8 text-slate-400">
+                منصة تربط الطلاب والخريجين بالمؤسسات،
+                وتساعد على الوصول إلى فرص التدريب والعمل
+                والتطوع في مكان واحد.
+              </p>
+
+              <div className="mt-7 flex items-center gap-3">
+
+                <a
+                  href="https://www.facebook.com/share/1EHXzj38uk/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Facebook"
+                  className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/5 text-slate-300 transition hover:bg-blue-700 hover:text-white"
+                >
+                  <FacebookIcon />
+                </a>
+
+                <a
+                  href="https://t.me/Jisr_Sudan"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Telegram"
+                  className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/5 text-slate-300 transition hover:bg-blue-700 hover:text-white"
+                >
+                  <TelegramIcon />
+                </a>
+
+                <a
+                  href="mailto:jisrsudan@gmail.com"
+                  aria-label="البريد الإلكتروني"
+                  className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/5 text-slate-300 transition hover:bg-blue-700 hover:text-white"
+                >
+                  <MailIcon />
+                </a>
+
+              </div>
+
+            </div>
+
+            <div>
+
+              <h3 className="font-bold">
+                المنصة
+              </h3>
+
+              <div className="mt-5 space-y-3 text-sm text-slate-400">
+
+                <Link
+                  href="/"
+                  className="block transition hover:text-white"
+                >
+                  الرئيسية
+                </Link>
+
+                <Link
+                  href="/opportunities"
+                  className="block transition hover:text-white"
+                >
+                  الفرص
+                </Link>
+
+                <Link
+                  href="/login"
+                  className="block transition hover:text-white"
+                >
+                  تسجيل الدخول
+                </Link>
+
+                <Link
+                  href="/register"
+                  className="block transition hover:text-white"
+                >
+                  إنشاء حساب
+                </Link>
+
+              </div>
+
+            </div>
+
+            <div>
+
+              <h3 className="font-bold">
+                تواصل معنا
+              </h3>
+
+              <div className="mt-5 space-y-4 text-sm text-slate-400">
+
+                <a
+                  href="https://www.facebook.com/share/1EHXzj38uk/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 transition hover:text-white"
+                >
+                  <FacebookIcon />
+                  Facebook
+                </a>
+
+                <a
+                  href="https://t.me/Jisr_Sudan"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 transition hover:text-white"
+                >
+                  <TelegramIcon />
+                  Telegram
+                </a>
+
+                <a
+                  href="mailto:jisrsudan@gmail.com"
+                  className="flex items-center gap-3 transition hover:text-white"
+                >
+                  <MailIcon />
+                  jisrsudan@gmail.com
+                </a>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          <div className="mt-12 border-t border-white/10 pt-7 text-center text-sm text-slate-500">
+            © {new Date().getFullYear()} منصة جسر. جميع الحقوق محفوظة.
+          </div>
+
+        </div>
+
+      </footer>
+    </main>
+  );
+}
